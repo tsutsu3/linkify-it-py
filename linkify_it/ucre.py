@@ -135,7 +135,7 @@ def re_src_path(opts):
         _ = opts["---"]
     # KeyError: Not found key:"---"
     # TypeError: opts is None
-    except KeyError or TypeError:
+    except (KeyError, TypeError):
         long_dash_flag = False
     else:
         long_dash_flag = True
