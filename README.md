@@ -1,12 +1,11 @@
 # linkify-it-py
 
-<!-- [![Build Status](https://img.shields.io/travis/markdown-it/linkify-it/master.svg?style=flat)](https://travis-ci.org/markdown-it/linkify-it)
-[![NPM version](https://img.shields.io/npm/v/linkify-it.svg?style=flat)](https://www.npmjs.org/package/linkify-it)
-[![Coverage Status](https://img.shields.io/coveralls/markdown-it/linkify-it/master.svg?style=flat)](https://coveralls.io/r/markdown-it/linkify-it?branch=master)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/markdown-it/linkify-it) -->
+[![CI](https://github.com/tsutsu3/linkify-it-py/workflows/CI/badge.svg?branch=main)](https://github.com/tsutsu3/linkify-it-py/actions)
+[![pypi](https://img.shields.io/pypi/v/linkify-it-py)](https://pypi.org/project/linkify-it-py/)
+[![codecov](https://codecov.io/gh/tsutsu3/linkify-it-py/branch/main/graph/badge.svg)](https://codecov.io/gh/tsutsu3/linkify-it-py)
+[![Maintainability](https://api.codeclimate.com/v1/badges/6341fd3ec5f05fde392f/maintainability)](https://codeclimate.com/github/tsutsu3/linkify-it-py/maintainability)
 
 This is Python port of [linkify-it](https://github.com/markdown-it/linkify-it).
-
 
 > Links recognition library with FULL unicode support.
 > Focused on high quality link patterns detection in plain text.
@@ -110,9 +109,7 @@ linkifyit.add("@", {"validate": validate, "normalize": normalize})
 
 ## API
 
-**TODO**
-<!--
-__[API documentation](http://markdown-it.github.io/linkify-it/doc)__
+~~__[API documentation](http://markdown-it.github.io/linkify-it/doc)__~~
 
 ### LinkifyIt(schemas, options)
 
@@ -123,17 +120,18 @@ By default understands:
 - `http(s)://...` , `ftp://...`, `mailto:...` & `//...` links
 - "fuzzy" links and emails (google.com, foo@bar.com).
 
-`schemas` is an object, where each key/value describes protocol/rule:
+`schemas` is an dict, where each key/value describes protocol/rule:
 
 - __key__ - link prefix (usually, protocol name with `:` at the end, `skype:`
-  for example). `linkify-it` makes sure that prefix is not preceded with
+  for example). `linkify-it-py` makes sure that prefix is not preceded with
   alphanumeric char.
 - __value__ - rule to check tail after link prefix
-  - _String_ - just alias to existing rule
-  - _Object_
-    - _validate_ - either a `RegExp` (start with `^`, and don't include the
-      link prefix itself), or a validator function which, given arguments
-      _text_, _pos_, and _self_, returns the length of a match in _text_
+  - _str_
+    - just alias to existing rule
+  - _dict_
+    - _validate_ - either a `re.Pattern` (start with `^`, and don't include the
+      link prefix itself), or a validator `function` which, given arguments
+      _self_, _text_ and _pos_, returns the length of a match in _text_
       starting at index _pos_.  _pos_ is the index right after the link prefix.
       _self_ can be used to access the linkify object to cache data.
     - _normalize_ - optional function to normalize text & url of matched result
@@ -141,26 +139,26 @@ By default understands:
 
 `options`:
 
-- __fuzzyLink__ - recognize URL-s without `http(s)://` head. Default `true`.
-- __fuzzyIP__ - allow IPs in fuzzy links above. Can conflict with some texts
-  like version numbers. Default `false`.
-- __fuzzyEmail__ - recognize emails without `mailto:` prefix. Default `true`.
-- __---__ - set `true` to terminate link with `---` (if it's considered as long dash).
+- __fuzzy_link__ - recognize URL-s without `http(s)://` head. Default `True`.
+- __fuzzy_ip__ - allow IPs in fuzzy links above. Can conflict with some texts
+  like version numbers. Default `False`.
+- __fuzzy_email__ - recognize emails without `mailto:` prefix. Default `True`.
+- __---__ - set `True` to terminate link with `---` (if it's considered as long dash).
 
 
 ### .test(text)
 
-Searches linkifiable pattern and returns `true` on success or `false` on fail.
+Searches linkifiable pattern and returns `True` on success or `False` on fail.
 
 
 ### .pretest(text)
 
 Quick check if link MAY BE can exist. Can be used to optimize more expensive
-`.test()` calls. Return `false` if link can not be found, `true` - if `.test()`
+`.test()` calls. Return `False` if link can not be found, `True` - if `.test()`
 call needed to know exactly.
 
 
-### .testSchemaAt(text, name, offset)
+### .test_schema_at(text, name, position)
 
 Similar to `.test()` but checks only specific protocol tail exactly at given
 position. Returns length of found pattern (0 on fail).
@@ -168,20 +166,20 @@ position. Returns length of found pattern (0 on fail).
 
 ### .match(text)
 
-Returns `Array` of found link matches or null if nothing found.
+Returns `list` of found link matches or null if nothing found.
 
 Each match has:
 
 - __schema__ - link schema, can be empty for fuzzy links, or `//` for
-  protocol-neutral  links.
+  protocol-neutral links.
 - __index__ - offset of matched text
-- __lastIndex__ - index of next char after mathch end
+- __last_index__ - index of next char after mathch end
 - __raw__ - matched text
 - __text__ - normalized text
 - __url__ - link, generated from matched text
 
 
-### .tlds(list[, keepOld])
+### .tlds(list_tlds, keep_old=False)
 
 Load (or merge) new tlds list. Those are needed for fuzzy links (without schema)
 to avoid false positives. By default:
@@ -194,16 +192,16 @@ If that's not enough, you can reload defaults with more detailed zones list.
 
 ### .add(key, value)
 
-Add a new schema to the schemas object.  As described in the constructor
+Add a new schema to the schemas object. As described in the constructor
 definition, `key` is a link prefix (`skype:`, for example), and `value`
-is a String to alias to another schema, or an Object with `validate` and
+is a `str` to alias to another schema, or an `dict` with `validate` and
 optionally `normalize` definitions.  To disable an existing rule, use
-`.add(key, null)`.
+`.add(key, None)`.
 
 
 ### .set(options)
 
-Override default options. Missed properties will not be changed. -->
+Override default options. Missed properties will not be changed.
 
 
 ## License
