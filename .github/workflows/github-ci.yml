@@ -45,6 +45,27 @@ jobs:
           flags: pytests
           fail_ci_if_error: true
 
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install packagtes
+        run: |
+          pip install .[benchmark]
+      - name: linkify-it-py pretest benchmark
+        run: |
+          pytest benchmark/bench_core.py -k test_pretest -v
+      - name: linkify-it-py test benchmark
+        run: |
+          pytest benchmark/bench_core.py -k test_test -v
+      - name: linkify-it-py matchbenchmark
+        run: |
+          pytest benchmark/bench_core.py -k test_match -v
+
   publish:
     name: Publish to PyPi
     needs: [test]
