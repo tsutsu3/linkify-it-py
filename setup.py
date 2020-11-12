@@ -38,6 +38,7 @@ setuptools.setup(
     install_requires=["uc-micro-py"],
     extras_require={
         "dev": ["pre-commit", "isort", "flake8", "black"],
+        "benchnmark": ["pytest", "pytest-benchmark"],
         "test": ["coverage", "pytest", "pytest-cov"],
         "doc": ["sphinx", "sphinx_book_theme", "sphinx-rtd-theme"],
     },
