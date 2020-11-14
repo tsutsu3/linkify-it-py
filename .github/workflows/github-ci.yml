@@ -56,6 +56,9 @@ jobs:
       - name: Install packagtes
         run: |
           pip install .[benchmark]
+      - name: linkify-it-py init benchmark
+        run: |
+          pytest benchmark/bench_core.py -k test_init -v
       - name: linkify-it-py pretest benchmark
         run: |
           pytest benchmark/bench_core.py -k test_pretest -v
