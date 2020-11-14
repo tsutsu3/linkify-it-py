@@ -12,18 +12,18 @@ linkify\_it.main module
    :undoc-members:
    :show-inheritance:
 
-linkify\_it.re module
----------------------
+linkify\_it.tlds module
+-----------------------
 
-.. automodule:: linkify_it.re
+.. automodule:: linkify_it.tlds
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+linkify\_it.ucre module
+-----------------------
 
-.. automodule:: linkify_it
+.. automodule:: linkify_it.ucre
    :members:
    :undoc-members:
    :show-inheritance:

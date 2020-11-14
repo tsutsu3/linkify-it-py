@@ -130,7 +130,7 @@ TPL_EMAIL_FUZZY = (
 )
 
 
-def re_src_path(opts):
+def _re_src_path(opts):
     try:
         _ = opts["---"]
     # KeyError: Not found key:"---"
@@ -203,6 +203,14 @@ def re_src_path(opts):
 
 
 def build_re(opts):
+    """Build regex
+
+    Args:
+        opts (dict): options
+
+    Return:
+        dict: dict of regex string
+    """
     regex = {
         "src_Any": SRC_ANY,
         "src_Cc": SRC_CC,
@@ -216,7 +224,7 @@ def build_re(opts):
         "src_auth": SRC_AUTH,
         "src_port": SRC_PORT,
         "src_host_terminator": SRC_HOST_TERMINATOR,
-        "src_path": re_src_path(opts),
+        "src_path": _re_src_path(opts),
         "src_email_name": SRC_EMAIL_NAME,
         "src_xn": SRC_XN,
         "src_domain_root": SRC_DOMAIN_ROOT,
@@ -240,7 +248,7 @@ def build_re(opts):
             + "))"
             + "((?![$+<=>^`|\uff5c])"
             + TPL_HOST_PORT_FUZZY_STRICT
-            + re_src_path(opts)
+            + _re_src_path(opts)
             + ")"
         ),
         # Fuzzy link can't be prepended with .:/\- and non punctuation.
@@ -251,7 +259,7 @@ def build_re(opts):
             + "))"
             + "((?![$+<=>^`|\uff5c])"
             + TPL_HOST_PORT_NO_IP_FUZZY_STRICT
-            + re_src_path(opts)
+            + _re_src_path(opts)
             + ")"
         ),
     }
