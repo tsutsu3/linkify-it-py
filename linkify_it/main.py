@@ -8,23 +8,25 @@ from .ucre import build_re
 RE_TYPE = type(re.compile(r""))
 
 
-class SchemaError(Exception):
-    def __init__(self, name, val):
-        message = "(LinkifyIt) Invalid schema '{}': '{}'".format(name, val)
-        super().__init__(message)
-
-
-def escape_re(string):
+def _escape_re(string):
     return re.sub(r"[.?*+^$[\]\\(){}|-]", "\\$&", string)
 
 
-def index_of(text, search_value):
+def _index_of(text, search_value):
     try:
         result = text.index(search_value)
     except ValueError:
         result = -1
 
     return result
+
+
+class SchemaError(Exception):
+    """Linkify schema error"""
+
+    def __init__(self, name, val):
+        message = "(LinkifyIt) Invalid schema '{}': '{}'".format(name, val)
+        super().__init__(message)
 
 
 class Match:
@@ -37,6 +39,10 @@ class Match:
         raw (str): Matched string.
         text (str): Notmalized text of matched string.
         url (str): Normalized url of matched string.
+
+    Args:
+        linkifyit (:class:`linkify_it.main.LinkifyIt`) LinkifyIt object
+        shift (int): text searh position
     """
 
     def __repr__(self):
@@ -65,29 +71,37 @@ class LinkifyIt:
     - ``http(s)://...`` , ``ftp://...``, ``mailto:...`` & ``//...`` links
     - "fuzzy" links and emails (example.com, foo@bar.com).
 
-    ``schemas`` is an object, where each key/value describes protocol/rule:
+    ``schemas`` is an dict where each key/value describes protocol/rule:
 
     - **key** - link prefix (usually, protocol name with ``:`` at the end, ``skype:``
       for example). `linkify-it` makes shure that prefix is not preceeded with
-      alphanumeric char and symbols. Only whitespaces and punctuation allowed.
+      alphanumeric char. Only whitespaces and punctuation allowed.
+
     - **value** - rule to check tail after link prefix
-      - *String* - just alias to existing rule
-      - *Object*
-        - *validate* - validator function (should return matched length on
-          success), or ``RegExp``.
+
+      - *str* - just alias to existing rule
+      - *dict*
+
+        - *validate* - either a ``re.Pattern``, ``re str`` (start with ``^``, and don't
+          include the link prefix itself), or a validator ``function`` which, given
+          arguments *self*, *text* and *pos* returns the length of a match in *text*
+          starting at index *pos*. *pos* is the index right after the link prefix.
         - *normalize* - optional function to normalize text & url of matched
           result (for example, for @twitter mentions).
 
-    ``options``:
+    ``options`` is an dict:
 
-    - **fuzzyLink** - recognige URL-s without ``http(s):`` prefix. Default ``true``.
+    - **fuzzyLink** - recognige URL-s without ``http(s):`` prefix. Default ``True``.
     - **fuzzyIP** - allow IPs in fuzzy links above. Can conflict with some texts
-      like version numbers. Default ``false``.
+      like version numbers. Default ``False``.
     - **fuzzyEmail** - recognize emails without ``mailto:`` prefix.
+    - **---** - set `True` to terminate link with `---` (if it's considered as long
+      dash).
 
-    Attributes:
+    Args:
         schemas (dict): Optional. Additional schemas to validate (prefix/validator)
-        options (dict): { fuzzyLink|fuzzyEmail|fuzzyIP: true|false }
+        options (dict): { fuzzy_link | fuzzy_email | fuzzy_ip: True | False }.
+            Default: {"fuzzy_link": True, "fuzzy_email": True, "fuzzy_ip": False}.
     """
 
     def _validate_http(self, text, pos):
@@ -336,7 +350,7 @@ class LinkifyIt:
         #
         slist = "|".join(
             [
-                escape_re(name)
+                _escape_re(name)
                 for name, val in self._compiled.items()
                 if len(name) > 0 and val
             ]
@@ -359,36 +373,49 @@ class LinkifyIt:
         self._reset_scan_cache()
 
     def add(self, schema, definition):
-        """Add new rule definition.
+        """Add new rule definition. (chainable)
 
-        See constructor description for details.
+        See :class:`linkify_it.main.LinkifyIt` init description for details.
+        ``schema`` is a link prefix (``skype:``, for example), and ``definition``
+        is a ``str`` to alias to another schema, or an ``dict`` with ``validate`` and
+        optionally `normalize` definitions. To disable an existing rule, use
+        ``.add(<schema>, None)``.
 
         Args:
             schema (str): rule name (fixed pattern prefix)
-            definition (str or regex or object): schema definition
+            definition (`str` or `re.Pattern`): schema definition
+
+        Return:
+            :class:`linkify_it.main.LinkifyIt`
         """
         self._schemas[schema] = definition
         self._compile()
         return self
 
     def set(self, options):
-        """Set recognition options for links without schema.
+        """Override default options. (chainable)
+
+        Missed properties will not be changed.
 
         Args:
-            options (object): { fuzzyLink|fuzzyEmail|fuzzyIP: true|false }
+            options (dict): ``keys``: [``fuzzy_link`` | ``fuzzy_email`` | ``fuzzy_ip``].
+                ``values``: [``True`` | ``False``]
+
+        Return:
+            :class:`linkify_it.main.LinkifyIt`
         """
         self._opts.update(options)
         return self
 
     def test(self, text):
-        """Searches linkifiable pattern and returns `true` on success or `false`
+        """Searches linkifiable pattern and returns ``True`` on success or ``False``
         on fail.
 
         Args:
-            text (str): xxxxxx
+            text (str): text to search
 
         Returns:
-            bool: xxxxxx
+            bool: ``True`` if a linkable pattern was found, otherwise it is ``False``.
         """
         self._text_cache = text
         self._index = -1
@@ -438,7 +465,7 @@ class LinkifyIt:
 
         if self._opts.get("fuzzy_email") and self._compiled.get("mailto:"):
             # guess schemaless emails
-            at_pos = index_of(text, "@")
+            at_pos = _index_of(text, "@")
             if at_pos >= 0:
                 # We can't skip this check, because this cases are possible:
                 # 192.168.1.1@gmail.com, my.in@example.com
@@ -465,10 +492,10 @@ class LinkifyIt:
         when you need to check that link NOT exists.
 
         Args:
-            text (str): xxxxxx
+            text (str): text to search
 
         Returns:
-            bool: xxxxxx
+            bool: ``True`` if a linkable pattern was found, otherwise it is ``False``.
         """
         if re.search(self.re["pretest"], text, flags=re.IGNORECASE):
             return True
@@ -476,13 +503,16 @@ class LinkifyIt:
         return False
 
     def test_schema_at(self, text, name, position):
-        """Similar to `~linkify_it.LinkifyIt.test` but checks only specific protocol
-        tail exactly at given position. Returns length of found pattern (0 on fail).
+        """Similar to :meth:`linkify_it.main.LinkifyIt.test` but checks only
+        specific protocol tail exactly at given position.
 
         Args:
             text (str): text to scan
             name (str): rule (schema) name
-            position (int): text offset to check from
+            position (int): length of found pattern (0 on fail).
+
+        Returns:
+            int: text (str): text to search
         """
         # If not supported schema check requested - terminate
         if not self._compiled.get(name.lower()):
@@ -490,20 +520,20 @@ class LinkifyIt:
         return self._compiled.get(name.lower()).get("validate")(text, position)
 
     def match(self, text):
-        """Returns array of found link descriptions or `null` on fail.
+        """Returns ``list`` of found link descriptions or ``None`` on fail.
 
-        We strongly recommend to use `~linkify_it.LinkifyIt.test` first, for best
-        speed.
+        We strongly recommend to use :meth:`linkify_it.main.LinkifyIt.test`
+        first, for best speed.
 
         Args:
-            text (str):
+            text (str): text to search
 
         Returns:
-            list or None: Result match description
-                * **schema** - link schema, can be empty for fuzzy links, or `//`
-                    for protocol-neutral  links.
+            ``list`` or ``None``: Result match description:
+                * **schema** - link schema, can be empty for fuzzy links, or ``//``
+                  for protocol-neutral  links.
                 * **index** - offset of matched text
-                * **lastIndex** - offset of matched text
+                * **last_index** - offset of matched text
                 * **raw** - offset of matched text
                 * **text** - normalized text
                 * **url** - link, generated from matched text
@@ -532,21 +562,21 @@ class LinkifyIt:
         return None
 
     def tlds(self, list_tlds, keep_old=False):
-        """Load (or merge) new tlds list.
+        """Load (or merge) new tlds list. (chainable)
 
         Those are user for fuzzy links (without prefix) to avoid false positives.
         By default this algorythm used:
 
         * hostname with any 2-letter root zones are ok.
         * biz|com|edu|gov|net|org|pro|web|xxx|aero|asia|coop|info|museum|name|shop|рф
-            are ok.
+          are ok.
         * encoded (`xn--...`) root zones are ok.
 
         If list is replaced, then exact match for 2-chars root zones will be checked.
 
         Args:
-            list_tlds (list): list of tlds
-            keep_old (bool): merge with current list if `true` (`false` by default)
+            list_tlds (list or str): ``list of tlds`` or ``tlds string``
+            keep_old (bool): merge with current list if q`True`q (q`Falseq` by default)
         """
         _list = list_tlds if isinstance(list_tlds, list) else [list_tlds]
 

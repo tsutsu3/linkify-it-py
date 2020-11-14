@@ -40,6 +40,6 @@ setuptools.setup(
         "dev": ["pre-commit", "isort", "flake8", "black"],
         "benchmark": ["pytest", "pytest-benchmark"],
         "test": ["coverage", "pytest", "pytest-cov"],
-        "doc": ["sphinx", "sphinx_book_theme", "sphinx-rtd-theme"],
+        "doc": ["sphinx", "sphinx_book_theme" "myst-parser"],
     },
 )
