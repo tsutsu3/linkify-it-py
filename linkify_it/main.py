@@ -1,25 +1,24 @@
 import copy
 import re
-import sys
 import types
 
 from .ucre import build_re
 
-if sys.version_info[1] == 6:
-    RE_TYPE = re._pattern_type
-elif sys.version_info[1] > 6:
-    RE_TYPE = re.Pattern
+# py>=37: re.Pattern, else: _sre.SRE_Pattern
+RE_TYPE = type(re.compile(r""))
 
 
-# =============================================================================
-# Helpers
-# =============================================================================
+class SchemaError(Exception):
+    def __init__(self, name, val):
+        message = "(LinkifyIt) Invalid schema '{}': '{}'".format(name, val)
+        super().__init__(message)
+
+
 def escape_re(string):
-    ESCAPE_RE = re.compile(r"[.?*+^$[\]\\(){}|-]")
-    return ESCAPE_RE.sub("\\$&", string)
+    return re.sub(r"[.?*+^$[\]\\(){}|-]", "\\$&", string)
 
 
-def indexOf(text, search_value):
+def index_of(text, search_value):
     try:
         result = text.index(search_value)
     except ValueError:
@@ -58,16 +57,6 @@ class Match:
         self.url = text
 
 
-# =============================================================================
-class SchemaError(Exception):
-    def __init__(self, name, val):
-        message = "(LinkifyIt) Invalid schema '{}': '{}'".format(name, val)
-        super().__init__(message)
-
-
-# =============================================================================
-
-
 class LinkifyIt:
     """Creates new linkifier instance with optional additional schemas.
 
@@ -100,11 +89,6 @@ class LinkifyIt:
         schemas (dict): Optional. Additional schemas to validate (prefix/validator)
         options (dict): { fuzzyLink|fuzzyEmail|fuzzyIP: true|false }
     """
-
-    # def build_default_schems(self, text, pos):
-    #     self.default_schemas["http:"] = self._validate_http(text, pos)
-    #     self.default_schemas["//"] = self._validate_double_slash(text, pos)
-    #     self.default_schemas["mailto:"] = self._validate_mailto(text, pos)
 
     def _validate_http(self, text, pos):
         tail = text[pos:]
@@ -176,7 +160,12 @@ class LinkifyIt:
     def _create_validator(self, regex):
         def func(text, pos):
             tail = text[pos:]
-            founds = re.search(regex, tail)
+            if isinstance(regex, str):
+                founds = re.search(regex, tail, flags=re.IGNORECASE)
+            else:
+                # re.Pattern
+                founds = re.search(regex, tail)
+
             if founds:
                 return len(founds.group(0))
 
@@ -249,9 +238,7 @@ class LinkifyIt:
         """Schemas compiler. Build regexps."""
 
         # Load & clone RE patterns.
-        # regex = copy.deepcopy(build_re(self._opts))
-        # self.re = copy.deepcopy(build_re(self._opts))
-        regex = self.re = build_re(self._opts)
+        self.re = build_re(self._opts)
 
         # Define dynamic patterns
         tlds = copy.deepcopy(self._tlds)
@@ -260,20 +247,20 @@ class LinkifyIt:
 
         if not self._tlds_replaced:
             tlds.append(self.tlds_2ch_src_re)
-        tlds.append(regex["src_xn"])
+        tlds.append(self.re["src_xn"])
 
-        regex["src_tlds"] = "|".join(tlds)
+        self.re["src_tlds"] = "|".join(tlds)
 
         def untpl(tpl):
-            return tpl.replace("%TLDS%", regex["src_tlds"])
+            return tpl.replace("%TLDS%", self.re["src_tlds"])
 
-        regex["email_fuzzy"] = untpl(regex["tpl_email_fuzzy"])
+        self.re["email_fuzzy"] = untpl(self.re["tpl_email_fuzzy"])
 
-        regex["link_fuzzy"] = untpl(regex["tpl_link_fuzzy"])
+        self.re["link_fuzzy"] = untpl(self.re["tpl_link_fuzzy"])
 
-        regex["link_no_ip_fuzzy"] = untpl(regex["tpl_link_no_ip_fuzzy"])
+        self.re["link_no_ip_fuzzy"] = untpl(self.re["tpl_link_no_ip_fuzzy"])
 
-        regex["host_fuzzy_test"] = untpl(regex["tpl_host_fuzzy_test"])
+        self.re["host_fuzzy_test"] = untpl(self.re["tpl_host_fuzzy_test"])
 
         #
         # Compile each schema
@@ -295,6 +282,8 @@ class LinkifyIt:
             if isinstance(val, dict):
                 if isinstance(val.get("validate"), RE_TYPE):
                     compiled["validate"] = self._create_validator(val.get("validate"))
+                elif isinstance(val.get("validate"), str):
+                    compiled["validate"] = self._create_validator(val.get("validate"))
                 elif isinstance(val.get("validate"), types.MethodType):
                     compiled["validate"] = val.get("validate")
                 # Add custom handler
@@ -302,6 +291,8 @@ class LinkifyIt:
                     setattr(LinkifyIt, "func", val.get("validate"))
                     compiled["validate"] = self.func
                 else:
+                    print(RE_TYPE)
+                    print(val.get("validate"), type(val.get("validate")))
                     raise SchemaError(name, val)
 
                 if isinstance(val.get("normalize"), types.MethodType):
@@ -352,7 +343,7 @@ class LinkifyIt:
         )
 
         re_schema_test = (
-            "(^|(?!_)(?:[><\uff5c]|" + regex["src_ZPCc"] + "))(" + slist + ")"
+            "(^|(?!_)(?:[><\uff5c]|" + self.re["src_ZPCc"] + "))(" + slist + ")"
         )
 
         # (?!_) cause 1.5x slowdown
@@ -447,7 +438,7 @@ class LinkifyIt:
 
         if self._opts.get("fuzzy_email") and self._compiled.get("mailto:"):
             # guess schemaless emails
-            at_pos = indexOf(text, "@")
+            at_pos = index_of(text, "@")
             if at_pos >= 0:
                 # We can't skip this check, because this cases are possible:
                 # 192.168.1.1@gmail.com, my.in@example.com
@@ -497,8 +488,6 @@ class LinkifyIt:
         if not self._compiled.get(name.lower()):
             return 0
         return self._compiled.get(name.lower()).get("validate")(text, position)
-        # custom twitter API
-        # return self._compiled.get(name.lower()).get("validate")(self, text, position)
 
     def match(self, text):
         """Returns array of found link descriptions or `null` on fail.
@@ -562,7 +551,7 @@ class LinkifyIt:
         _list = list_tlds if isinstance(list_tlds, list) else [list_tlds]
 
         if not keep_old:
-            self._tlds = copy.copy(_list)
+            self._tlds = _list
             self._tlds_replaced = True
             self._compile()
             return self
