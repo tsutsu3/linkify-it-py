@@ -109,7 +109,7 @@ linkifyit.add("@", {"validate": validate, "normalize": normalize})
 
 ## API
 
-~~__[API documentation](http://markdown-it.github.io/linkify-it/doc)__~~
+[API documentation](https://linkify-it-py.readthedocs.io/en/latest/)
 
 ### LinkifyIt(schemas, options)
 
