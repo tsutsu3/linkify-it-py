@@ -20,6 +20,13 @@ def get_ids(path):
 @pytest.mark.parametrize(
     "filename", read_samples(SAMPLES_PATH), ids=get_ids(SAMPLES_PATH)
 )
+def test_init(benchmark, filename):
+    benchmark(LinkifyIt)
+
+
+@pytest.mark.parametrize(
+    "filename", read_samples(SAMPLES_PATH), ids=get_ids(SAMPLES_PATH)
+)
 def test_pretest(benchmark, filename):
     linkify = LinkifyIt()
 
