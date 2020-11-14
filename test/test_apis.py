@@ -3,7 +3,32 @@ import re
 import pytest
 
 from linkify_it import LinkifyIt, SchemaError
+from linkify_it.main import Match
 from linkify_it.tlds import TLDS
+
+
+def test_pretest_false():
+    linkifyit = LinkifyIt()
+    assert linkifyit.pretest("nolink") is False
+
+
+def test_create_instance_with_schemas():
+    schemas = {"my:": {"validate": r"^\/\/[a-z]+"}}
+    linkifyit = LinkifyIt(schemas)
+
+    match = linkifyit.match("google.com. my:// my://asdf!")
+
+    assert match[0].text == "google.com"
+    assert match[1].text == "my://asdf"
+
+
+def test_match_class():
+    linkifyit = LinkifyIt()
+    match = Match(linkifyit, 0)
+    assert (
+        match.__repr__()
+        == "linkify_it.main.Match({'schema': '', 'index': -1, 'last_index': -1, 'raw': '', 'text': '', 'url': ''})"  # noqa: E501
+    )
 
 
 def test_api_extend_tlds():
@@ -83,6 +108,9 @@ def test_api_disable_rule():
 
 
 def test_api_add_bad_definition():
+    with pytest.raises(SchemaError):
+        linkifyit = LinkifyIt({"fuzzy_link": False})
+
     linkifyit = LinkifyIt()
 
     with pytest.raises(SchemaError):
