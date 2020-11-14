@@ -111,15 +111,14 @@ class LinkifyIt:
         if not self.re.get("http"):
             # compile lazily, because "host"-containing variables can change on
             # tlds update.
-            self.re["http"] = re.compile(
+            self.re["http"] = (
                 "^\\/\\/"
                 + self.re["src_auth"]
                 + self.re["src_host_port_strict"]
-                + self.re["src_path"],
-                flags=re.IGNORECASE,
+                + self.re["src_path"]
             )
 
-        founds = self.re["http"].search(tail)
+        founds = re.search(self.re["http"], tail, flags=re.IGNORECASE)
         if founds:
             return len(founds.group())
 
@@ -131,22 +130,20 @@ class LinkifyIt:
         if not self.re.get("not_http"):
             # compile lazily, because "host"-containing variables can change on
             # tlds update.
-            self.re["not_http"] = re.compile(
-                "^" + self.re["src_auth"] +
-                # Don't allow single-level domains, because of false positives
-                # like '//test' with code comments
-                "(?:localhost|(?:(?:"
+            self.re["not_http"] = (
+                "^"
+                + self.re["src_auth"]
+                + "(?:localhost|(?:(?:"
                 + self.re["src_domain"]
                 + ")\\.)+"
                 + self.re["src_domain_root"]
                 + ")"
                 + self.re["src_port"]
                 + self.re["src_host_terminator"]
-                + self.re["src_path"],
-                flags=re.IGNORECASE,
+                + self.re["src_path"]
             )
 
-        founds = self.re["not_http"].search(tail)
+        founds = re.search(self.re["not_http"], tail, flags=re.IGNORECASE)
         if founds:
             if pos >= 3 and text[pos - 3] == ":":
                 return 0
@@ -162,12 +159,11 @@ class LinkifyIt:
         tail = text[pos:]
 
         if not self.re.get("mailto"):
-            self.re["mailto"] = re.compile(
-                "^" + self.re["src_email_name"] + "@" + self.re["src_host_strict"],
-                flags=re.IGNORECASE,
+            self.re["mailto"] = (
+                "^" + self.re["src_email_name"] + "@" + self.re["src_host_strict"]
             )
 
-        founds = self.re["mailto"].search(tail)
+        founds = re.search(self.re["mailto"], tail, flags=re.IGNORECASE)
         if founds:
             return len(founds.group(0))
 
@@ -180,7 +176,7 @@ class LinkifyIt:
     def _create_validator(self, regex):
         def func(text, pos):
             tail = text[pos:]
-            founds = regex.search(tail)
+            founds = re.search(regex, tail)
             if founds:
                 return len(founds.group(0))
 
@@ -271,18 +267,13 @@ class LinkifyIt:
         def untpl(tpl):
             return tpl.replace("%TLDS%", regex["src_tlds"])
 
-        regex["email_fuzzy"] = re.compile(
-            untpl(regex["tpl_email_fuzzy"]), flags=re.IGNORECASE
-        )
-        regex["link_fuzzy"] = re.compile(
-            untpl(regex["tpl_link_fuzzy"]), flags=re.IGNORECASE
-        )
-        regex["link_no_ip_fuzzy"] = re.compile(
-            untpl(regex["tpl_link_no_ip_fuzzy"]), flags=re.IGNORECASE
-        )
-        regex["host_fuzzy_test"] = re.compile(
-            untpl(regex["tpl_host_fuzzy_test"]), flags=re.IGNORECASE
-        )
+        regex["email_fuzzy"] = untpl(regex["tpl_email_fuzzy"])
+
+        regex["link_fuzzy"] = untpl(regex["tpl_link_fuzzy"])
+
+        regex["link_no_ip_fuzzy"] = untpl(regex["tpl_link_no_ip_fuzzy"])
+
+        regex["host_fuzzy_test"] = untpl(regex["tpl_host_fuzzy_test"])
 
         #
         # Compile each schema
@@ -365,12 +356,11 @@ class LinkifyIt:
         )
 
         # (?!_) cause 1.5x slowdown
-        self.re["schema_test"] = re.compile(re_schema_test, flags=re.IGNORECASE)
-        self.re["schema_search"] = re.compile(re_schema_test, flags=re.IGNORECASE)
+        self.re["schema_test"] = re_schema_test
+        self.re["schema_search"] = re_schema_test
 
-        self.re["pretest"] = re.compile(
-            "(" + re_schema_test + ")|(" + self.re["host_fuzzy_test"].pattern + ")|@",
-            flags=re.IGNORECASE,
+        self.re["pretest"] = (
+            "(" + re_schema_test + ")|(" + self.re["host_fuzzy_test"] + ")|@"
         )
 
         # Cleanup
@@ -415,10 +405,10 @@ class LinkifyIt:
         if not len(text):
             return False
 
-        if self.re["schema_test"].search(text):
+        if re.search(self.re["schema_test"], text, flags=re.IGNORECASE):
             regex = self.re["schema_search"]
             last_index = 0
-            matched_iter = regex.finditer(text[last_index:])
+            matched_iter = re.finditer(regex, text[last_index:], flags=re.IGNORECASE)
             for matched in matched_iter:
                 last_index = matched.end(0)
                 m = (matched.group(), matched.groups()[0], matched.groups()[1])
@@ -431,7 +421,9 @@ class LinkifyIt:
 
         if self._opts.get("fuzzy_link") and self._compiled.get("http:"):
             # guess schemaless links
-            matched_tld = self.re["host_fuzzy_test"].search(text)
+            matched_tld = re.search(
+                self.re["host_fuzzy_test"], text, flags=re.IGNORECASE
+            )
             if matched_tld:
                 tld_pos = matched_tld.start(0)
             else:
@@ -444,7 +436,7 @@ class LinkifyIt:
                     else:
                         pattern = self.re["link_no_ip_fuzzy"]
 
-                    ml = pattern.search(text)
+                    ml = re.search(pattern, text, flags=re.IGNORECASE)
                     if ml:
                         shift = ml.start(0) + len(ml.groups()[0])
 
@@ -459,7 +451,7 @@ class LinkifyIt:
             if at_pos >= 0:
                 # We can't skip this check, because this cases are possible:
                 # 192.168.1.1@gmail.com, my.in@example.com
-                me = self.re["email_fuzzy"].search(text)
+                me = re.search(self.re["email_fuzzy"], text, flags=re.IGNORECASE)
                 if me:
                     shift = me.start(0) + len(me.groups()[0])
                     next_shift = me.start(0) + len(me.group())
@@ -487,7 +479,7 @@ class LinkifyIt:
         Returns:
             bool: xxxxxx
         """
-        if self.re["pretest"].search(text):
+        if re.search(self.re["pretest"], text, flags=re.IGNORECASE):
             return True
 
         return False
