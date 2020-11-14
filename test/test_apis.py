@@ -3,7 +3,32 @@ import re
 import pytest
 
 from linkify_it import LinkifyIt, SchemaError
+from linkify_it.main import Match
 from linkify_it.tlds import TLDS
+
+
+def test_pretest_false():
+    linkifyit = LinkifyIt()
+    assert linkifyit.pretest("nolink") is False
+
+
+def test_create_instance_with_schemas():
+    schemas = {"my:": {"validate": r"^\/\/[a-z]+"}}
+    linkifyit = LinkifyIt(schemas)
+
+    match = linkifyit.match("google.com. my:// my://asdf!")
+
+    assert match[0].text == "google.com"
+    assert match[1].text == "my://asdf"
+
+
+def test_match_class():
+    linkifyit = LinkifyIt()
+    match = Match(linkifyit, 0)
+    assert (
+        match.__repr__()
+        == "linkify_it.main.Match({'schema': '', 'index': -1, 'last_index': -1, 'raw': '', 'text': '', 'url': ''})"  # noqa: E501
+    )
 
 
 def test_api_extend_tlds():
@@ -32,13 +57,37 @@ def test_api_add_rule_as_regex_with_default_normalizer():
     assert match[1].text == "my://asdf"
 
 
-def test_api_add_rule_with_normaliser():
+def test_api_add_rule_as_regex_with_default_normalizer_with_no_compile():
+    linkifyit = LinkifyIt().add("my:", {"validate": r"^\/\/[a-z]+"})
+
+    match = linkifyit.match("google.com. my:// my://asdf!")
+
+    assert match[0].text == "google.com"
+    assert match[1].text == "my://asdf"
+
+
+def test_api_add_rule_with_normalizer():
     def func_normalize(self, m):
         m.text = re.sub(r"^my://", "", m.text).upper()
         m.url = m.url.upper()
 
     linkifyit = LinkifyIt().add(
         "my:", {"validate": re.compile(r"^\/\/[a-z]+"), "normalize": func_normalize}
+    )
+
+    match = linkifyit.match("google.com. my:// my://asdf!")
+
+    assert match[1].text == "ASDF"
+    assert match[1].url == "MY://ASDF"
+
+
+def test_api_add_rule_with_normalizer_no_cimpile():
+    def func_normalize(self, m):
+        m.text = re.sub(r"^my://", "", m.text).upper()
+        m.url = m.url.upper()
+
+    linkifyit = LinkifyIt().add(
+        "my:", {"validate": r"^\/\/[a-z]+", "normalize": func_normalize}
     )
 
     match = linkifyit.match("google.com. my:// my://asdf!")
@@ -59,6 +108,9 @@ def test_api_disable_rule():
 
 
 def test_api_add_bad_definition():
+    with pytest.raises(SchemaError):
+        linkifyit = LinkifyIt({"fuzzy_link": False})
+
     linkifyit = LinkifyIt()
 
     with pytest.raises(SchemaError):
@@ -127,6 +179,33 @@ def test_api_twitter_rule():
             if pos > 2 and tail[pos - 2] == "@":
                 return False
             return len(self.re["twitter"].search(tail).group())
+        return 0
+
+    def normalize(self, m):
+        m.url = "https://twitter.com/" + re.sub(r"^@", "", m.url)
+
+    linkifyit.add("@", {"validate": validate, "normalize": normalize})
+
+    assert linkifyit.match("hello, @gamajoba_!")[0].text == "@gamajoba_"
+    assert linkifyit.match(":@givi")[0].text == "@givi"
+    assert linkifyit.match(":@givi")[0].url == "https://twitter.com/givi"
+    assert not linkifyit.test("@@invalid")
+
+
+def test_api_twitter_rule_no_compile():
+    linkifyit = LinkifyIt()
+
+    def validate(self, text, pos):
+        tail = text[pos:]
+
+        if not self.re.get("twitter"):
+            self.re["twitter"] = (
+                "^([a-zA-Z0-9_]){1,15}(?!_)(?=$|" + self.re["src_ZPCc"] + ")"
+            )
+        if re.search(self.re["twitter"], tail):
+            if pos > 2 and tail[pos - 2] == "@":
+                return False
+            return len(re.search(self.re["twitter"], tail).group())
         return 0
 
     def normalize(self, m):
