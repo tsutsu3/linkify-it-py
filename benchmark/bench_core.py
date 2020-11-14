@@ -14,7 +14,7 @@ def read_samples(path):
 
 def get_ids(path):
     filenames = path.glob("**/*.txt")
-    return [x.name for x in filenames]
+    return sorted([x.name for x in filenames])
 
 
 @pytest.mark.parametrize(
