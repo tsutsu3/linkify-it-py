@@ -305,8 +305,6 @@ class LinkifyIt:
                     setattr(LinkifyIt, "func", val.get("validate"))
                     compiled["validate"] = self.func
                 else:
-                    print(RE_TYPE)
-                    print(val.get("validate"), type(val.get("validate")))
                     raise SchemaError(name, val)
 
                 if isinstance(val.get("normalize"), types.MethodType):
