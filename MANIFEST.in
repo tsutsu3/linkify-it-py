@@ -1,0 +1,20 @@
+exclude benchmark
+recursive-exclude benchmark *
+
+exclude docs
+recursive-exclude docs *
+
+exclude test
+recursive-exclude test *
+
+exclude \
+    .pre-commit-config.yaml \
+    .readthedocs.yml \
+    codecov.yml \
+    setup.cfg \
+    tox.ini \
+
+include \
+    README.md \
+    CHANGELOG.md \
+    LICENSE \
