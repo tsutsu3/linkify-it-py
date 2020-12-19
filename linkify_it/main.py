@@ -189,7 +189,7 @@ class LinkifyIt:
 
     def _create_normalizer(self):
         def func(match):
-            self._normalize(match)
+            self.normalize(match)
 
         return func
 
@@ -590,11 +590,11 @@ class LinkifyIt:
         self._compile()
         return self
 
-    def _normalize(self, match):
+    def normalize(self, match):
         """Default normalizer (if schema does not define it's own).
 
         Args:
-            match ():
+            match (:class:`linkify_it.main.Match`): Match result
         """
         if not match.schema:
             match.url = "http://" + match.url
