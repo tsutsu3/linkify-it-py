@@ -82,28 +82,28 @@ print(linkify.match("Site tamanegi.onion!"))
 ### Example 3. Add twitter mentions handler
 
 ```python
-from linkify import LinkfiyIt
+from linkify_it import LinkifyIt
 
 
-linkifyit = LinkifyIt()
+linkify = LinkifyIt()
 
-def validate(self, text, pos):
+def validate(obj, text, pos):
     tail = text[pos:]
 
-    if not self.re.get("twitter"):
-        self.re["twitter"] = re.compile(
-            "^([a-zA-Z0-9_]){1,15}(?!_)(?=$|" + self.re["src_ZPCc"] + ")"
+    if not obj.re.get("twitter"):
+        obj.re["twitter"] = re.compile(
+            "^([a-zA-Z0-9_]){1,15}(?!_)(?=$|" + obj.re["src_ZPCc"] + ")"
         )
-    if self.re["twitter"].search(tail):
+    if obj.re["twitter"].search(tail):
         if pos > 2 and tail[pos - 2] == "@":
             return False
-        return len(self.re["twitter"].search(tail).group())
+        return len(obj.re["twitter"].search(tail).group())
     return 0
 
-def normalize(self, m):
-    m.url = "https://twitter.com/" + re.sub(r"^@", "", m.url)
+def normalize(obj, match):
+    match.url = "https://twitter.com/" + re.sub(r"^@", "", match.url)
 
-linkifyit.add("@", {"validate": validate, "normalize": normalize})
+linkify.add("@", {"validate": validate, "normalize": normalize})
 ```
 
 
