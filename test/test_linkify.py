@@ -20,7 +20,7 @@ def dummy(_):
 def test_links(number, line, expected):
     linkifyit = LinkifyIt(options={"fuzzy_ip": True})
 
-    linkifyit._normalize = dummy
+    linkifyit.normalize = dummy
 
     assert linkifyit.pretest(line) is True
     assert linkifyit.test("\n" + line + "\n") is True
@@ -35,6 +35,6 @@ def test_links(number, line, expected):
 def test_not_links(number, line, expected):
     linkifyit = LinkifyIt()
 
-    linkifyit._normalize = dummy
+    linkifyit.normalize = dummy
 
     assert linkifyit.test(line) is False
