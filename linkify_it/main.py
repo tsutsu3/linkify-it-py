@@ -9,7 +9,7 @@ RE_TYPE = type(re.compile(r""))
 
 
 def _escape_re(string):
-    return re.sub(r"[.?*+^$[\]\\(){}|-]", "\\$&", string)
+    return re.sub(r"([.?*+^$[\]\\(){}|-])", r"\\\1", string)
 
 
 def _index_of(text, search_value):
