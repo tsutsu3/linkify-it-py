@@ -268,3 +268,15 @@ def test_api_shoud_accept_triple_minus():
     linkifyit = LinkifyIt(None, {"---": True})
 
     assert linkifyit.match("http://e.com/foo---bar")[0].text == "http://e.com/foo"
+
+
+# issue #25. Schema key containing - not producing matches
+@pytest.mark.parametrize(
+    "escape_str",
+    {".", "?", "*", "+", "^", "$", "[", "]", "\\", "(", ")", "{", "}", "|", "-"},
+)
+def test_api_add_alias_rule_with_excape_re_string(escape_str):
+    linkifyit = LinkifyIt()
+
+    linkifyit.add("foo{}bar:".format(escape_str), "http:")
+    assert linkifyit.test("Check foo{}bar://test".format(escape_str)) is True
