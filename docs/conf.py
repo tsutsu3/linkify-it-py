@@ -23,7 +23,7 @@ copyright = "2020, tsutsu3"
 author = "tsutsu3"
 
 # The full version, including alpha/beta/rc tags
-release = "v1.0.0"
+release = "v1.0.2"
 
 
 # -- General configuration ---------------------------------------------------
