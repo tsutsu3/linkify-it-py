@@ -153,7 +153,7 @@ def _re_src_path(opts):
         + SRC_ZCC
         + "|"
         + TEXT_SEPARATORS
-        + "|[()[\\]{}.,\"'?!\\-]).|"
+        + "|[()[\\]{}.,\"'?!\\-;]).|"
         + "\\[(?:(?!"
         + SRC_ZCC
         + "|\\]).)*\\]|"
@@ -185,7 +185,10 @@ def _re_src_path(opts):
         + SRC_ZCC
         + "|[.]).|"
         + options
-        + "\\,(?!"
+        + ",(?!"
+        + SRC_ZCC
+        + ").|"  # allow `,,,` in paths
+        + ";(?!"
         + SRC_ZCC
         + ").|"  # allow `,,,` in paths
         + "\\!+(?!"
