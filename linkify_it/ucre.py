@@ -171,7 +171,7 @@ def _re_src_path(opts):
         + "|[']).)+\\'|"
         + "\\'(?="
         + SRC_PSEUDO_LETTER
-        + "|[-]).|"
+        + "|[-])|"
         + "\\.{2,}[a-zA-Z0-9%/&]|"
         # google has many dots in "google search" links (#66, #81).
         # github has ... in commit range links,
@@ -183,20 +183,20 @@ def _re_src_path(opts):
         # until more examples found.
         + "\\.(?!"
         + SRC_ZCC
-        + "|[.]).|"
+        + "|[.]|$)|"
         + options
         + ",(?!"
         + SRC_ZCC
-        + ").|"  # allow `,,,` in paths
+        + "|$)|"  # allow `,,,` in paths
         + ";(?!"
         + SRC_ZCC
-        + ").|"  # allow `,,,` in paths
+        + "|$)|"  # allow `,,,` in paths
         + "\\!+(?!"
         + SRC_ZCC
-        + "|[!]).|"  # allow `!!!` in paths, but not at the end
+        + "|[!]|$)|"  # allow `!!!` in paths, but not at the end
         + "\\?(?!"
         + SRC_ZCC
-        + "|[?])."
+        + "|[?]|$)"
         + ")+"
         + "|\\/"
         + ")?"
