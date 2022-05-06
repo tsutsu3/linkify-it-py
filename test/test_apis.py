@@ -282,6 +282,12 @@ def test_api_add_alias_rule_with_excape_re_string(escape_str):
     assert linkifyit.test("Check foo{}bar://test".format(escape_str)) is True
 
 
+def test_api_blank_test_match_at_the_start():
+    linkifyit = LinkifyIt()
+
+    assert not linkifyit.match_at_start("")
+
+
 def test_api_should_find_a_match_at_the_start():
     linkifyit = LinkifyIt()
 
