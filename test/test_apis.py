@@ -280,3 +280,40 @@ def test_api_add_alias_rule_with_excape_re_string(escape_str):
 
     linkifyit.add("foo{}bar:".format(escape_str), "http:")
     assert linkifyit.test("Check foo{}bar://test".format(escape_str)) is True
+
+
+def test_api_blank_test_match_at_the_start():
+    linkifyit = LinkifyIt()
+
+    assert not linkifyit.match_at_start("")
+
+
+def test_api_should_find_a_match_at_the_start():
+    linkifyit = LinkifyIt()
+
+    linkifyit = LinkifyIt(options={"fuzzy_link": True})
+    linkifyit.set({"fuzzy_link": True})
+
+    assert not linkifyit.test("@@invalid")
+    assert not linkifyit.match_at_start("google.com 123")
+    assert not linkifyit.match_at_start("  http://google.com 123")
+
+
+def test_api_match_a_start_should_not_interfere_with_normal_match():
+    linkifyit = LinkifyIt()
+
+    str = "http://google.com http://google.com"
+    assert linkifyit.match_at_start(str)
+    assert len(linkifyit.match(str)) == 2
+
+    str = "aaa http://google.com http://google.com"
+    assert not linkifyit.match_at_start(str)
+    assert len(linkifyit.match(str)) == 2
+
+
+def test_api_should_not_match_incomplete_links():
+    # regression test for https://github.com/markdown-it/markdown-it/issues/868
+    linkifyit = LinkifyIt()
+
+    assert not linkifyit.match_at_start("http://")
+    assert not linkifyit.match_at_start("https://")
