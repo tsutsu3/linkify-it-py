@@ -131,20 +131,6 @@ TPL_EMAIL_FUZZY = (
 
 
 def _re_src_path(opts):
-    try:
-        _ = opts["---"]
-    # KeyError: Not found key:"---"
-    # TypeError: opts is None
-    except (KeyError, TypeError):
-        long_dash_flag = False
-    else:
-        long_dash_flag = True
-
-    if long_dash_flag:
-        options = "\\-(?!--(?:[^-]|$))(?:-*)|"  # `---` => long dash, terminate
-    else:
-        options = "\\-+|"
-
     src_path = (
         "(?:"
         + "[/?#]"
@@ -184,7 +170,7 @@ def _re_src_path(opts):
         + "\\.(?!"
         + SRC_ZCC
         + "|[.]|$)|"
-        + options
+        + ("\\-(?!--(?:[^-]|$))(?:-*)|" if opts.get("---") else "\\-+|")
         + ",(?!"
         + SRC_ZCC
         + "|$)|"  # allow `,,,` in paths
