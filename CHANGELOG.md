@@ -1,8 +1,10 @@
 # Change Log
 
-## vx.x.x (2022-xx-xx) / Draft
+## v2.0.0 (2022-05-07)
 
 - Add `matchAtStart` method to match full URLs at the start of the string.
+- Fixed paired symbols (`()`, `{}`, `""`, etc.) after punctuation.
+- `---` option now affects parsing of emails  (e.g. `user@example.com---`)
 
 ## v1.0.3 (2021-12-18)
 
@@ -13,8 +15,6 @@
 - Fix: Schema key containing - not producing matches (#26)
 
 ## v1.0.1 (2020-12-18)
-
-### Added
 
 - Add manifest
 - Add codecov.yml
