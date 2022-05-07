@@ -38,17 +38,6 @@ SRC_PORT = (
     "(?::(?:6(?:[0-4]\\d{3}|5(?:[0-4]\\d{2}|5(?:[0-2]\\d|3[0-5])))|[1-5]?\\d{1,4}))?"
 )
 
-SRC_HOST_TERMINATOR = (
-    "(?=$|"
-    + TEXT_SEPARATORS
-    + "|"
-    + SRC_ZPCC
-    + ")(?!-|_|:\\d|\\.-|\\.(?!$|"
-    + SRC_ZPCC
-    + "))"
-)
-
-
 # Allow anything in markdown spec, forbid quote (") at the first position
 # because emails enclosed in quotes are far more common
 SRC_EMAIL_NAME = '[\\-:&=\\+\\$,\\.a-zA-Z0-9_][\\-:&=\\+\\$,\\"\\.a-zA-Z0-9_]*'
@@ -99,15 +88,6 @@ TPL_HOST_FUZZY = (
 
 TPL_HOST_NO_IP_FUZZY = "(?:(?:(?:" + SRC_DOMAIN + ")\\.)+(?:%TLDS%))"
 
-SRC_HOST_STRICT = SRC_HOST + SRC_HOST_TERMINATOR
-
-TPL_HOST_FUZZY_STRICT = TPL_HOST_FUZZY + SRC_HOST_TERMINATOR
-
-SRC_HOST_PORT_STRICT = SRC_HOST + SRC_PORT + SRC_HOST_TERMINATOR
-
-TPL_HOST_PORT_FUZZY_STRICT = TPL_HOST_FUZZY + SRC_PORT + SRC_HOST_TERMINATOR
-
-TPL_HOST_PORT_NO_IP_FUZZY_STRICT = TPL_HOST_NO_IP_FUZZY + SRC_PORT + SRC_HOST_TERMINATOR
 
 # =============================================================================
 
@@ -116,35 +96,24 @@ TPL_HOST_FUZZY_TEST = (
     "localhost|www\\.|\\.\\d{1,3}\\.|(?:\\.(?:%TLDS%)(?:" + SRC_ZPCC + "|>|$))"
 )
 
-TPL_EMAIL_FUZZY = (
-    "(^|"
-    + TEXT_SEPARATORS
-    + '|"|\\(|'
-    + SRC_ZCC
-    + ")"
-    + "("
-    + SRC_EMAIL_NAME
-    + "@"
-    + TPL_HOST_FUZZY_STRICT
-    + ")"
-)
+
+def _re_host_terminator(opts):
+    src_host_terminator = (
+        "(?=$|"
+        + TEXT_SEPARATORS
+        + "|"
+        + SRC_ZPCC
+        + ")"
+        + "(?!"
+        + ("-(?!--)|" if opts.get("---") else "-|")
+        + "_|:\\d|\\.-|\\.(?!$|"
+        + SRC_ZPCC
+        + "))"
+    )
+    return src_host_terminator
 
 
 def _re_src_path(opts):
-    try:
-        _ = opts["---"]
-    # KeyError: Not found key:"---"
-    # TypeError: opts is None
-    except (KeyError, TypeError):
-        long_dash_flag = False
-    else:
-        long_dash_flag = True
-
-    if long_dash_flag:
-        options = "\\-(?!--(?:[^-]|$))(?:-*)|"  # `---` => long dash, terminate
-    else:
-        options = "\\-+|"
-
     src_path = (
         "(?:"
         + "[/?#]"
@@ -184,7 +153,7 @@ def _re_src_path(opts):
         + "\\.(?!"
         + SRC_ZCC
         + "|[.]|$)|"
-        + options
+        + ("\\-(?!--(?:[^-]|$))(?:-*)|" if opts.get("---") else "\\-+|")
         + ",(?!"
         + SRC_ZCC
         + "|$)|"  # allow `,,,` in paths
@@ -214,6 +183,31 @@ def build_re(opts):
     Return:
         dict: dict of regex string
     """
+    SRC_HOST_STRICT = SRC_HOST + _re_host_terminator(opts)
+
+    TPL_HOST_FUZZY_STRICT = TPL_HOST_FUZZY + _re_host_terminator(opts)
+
+    SRC_HOST_PORT_STRICT = SRC_HOST + SRC_PORT + _re_host_terminator(opts)
+
+    TPL_HOST_PORT_FUZZY_STRICT = TPL_HOST_FUZZY + SRC_PORT + _re_host_terminator(opts)
+
+    TPL_HOST_PORT_NO_IP_FUZZY_STRICT = (
+        TPL_HOST_NO_IP_FUZZY + SRC_PORT + _re_host_terminator(opts)
+    )
+
+    TPL_EMAIL_FUZZY = (
+        "(^|"
+        + TEXT_SEPARATORS
+        + '|"|\\(|'
+        + SRC_ZCC
+        + ")"
+        + "("
+        + SRC_EMAIL_NAME
+        + "@"
+        + TPL_HOST_FUZZY_STRICT
+        + ")"
+    )
+
     regex = {
         "src_Any": SRC_ANY,
         "src_Cc": SRC_CC,
@@ -226,7 +220,7 @@ def build_re(opts):
         "src_ip4": SRC_IP4,
         "src_auth": SRC_AUTH,
         "src_port": SRC_PORT,
-        "src_host_terminator": SRC_HOST_TERMINATOR,
+        "src_host_terminator": _re_host_terminator(opts),
         "src_path": _re_src_path(opts),
         "src_email_name": SRC_EMAIL_NAME,
         "src_xn": SRC_XN,

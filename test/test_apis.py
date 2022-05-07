@@ -264,10 +264,12 @@ def test_api_shoud_accept_triple_minus():
     linkifyit = LinkifyIt()
 
     assert linkifyit.match("http://e.com/foo---bar")[0].text == "http://e.com/foo---bar"
+    assert linkifyit.match("text@example.com---foo") is None
 
     linkifyit = LinkifyIt(None, {"---": True})
 
     assert linkifyit.match("http://e.com/foo---bar")[0].text == "http://e.com/foo"
+    assert linkifyit.match("text@example.com---foo")[0].text == "text@example.com"
 
 
 # issue #25. Schema key containing - not producing matches
