@@ -5,6 +5,7 @@
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/linkify-it-py/badges/version.svg)](https://anaconda.org/conda-forge/linkify-it-py)
 [![codecov](https://codecov.io/gh/tsutsu3/linkify-it-py/branch/main/graph/badge.svg)](https://codecov.io/gh/tsutsu3/linkify-it-py)
 [![Maintainability](https://api.codeclimate.com/v1/badges/6341fd3ec5f05fde392f/maintainability)](https://codeclimate.com/github/tsutsu3/linkify-it-py/maintainability)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftsutsu3%2Flinkify-it-py.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftsutsu3%2Flinkify-it-py?ref=badge_shield)
 
 This is Python port of [linkify-it](https://github.com/markdown-it/linkify-it).
 
@@ -219,3 +220,6 @@ Override default options. Missed properties will not be changed.
 ## License
 
 [MIT](https://github.com/tsutsu3/linkify-it-py/blob/master/LICENSE)
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftsutsu3%2Flinkify-it-py.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftsutsu3%2Flinkify-it-py?ref=badge_large)
