@@ -11,23 +11,23 @@ jobs:
   code-style:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python 3.7
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.7
-      - uses: pre-commit/action@v2.0.0
+      - uses: pre-commit/action@v3.0.0
 
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
     steps:
       - name: Checkout source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -39,7 +39,7 @@ jobs:
           pytest --cov=linkify_it --cov-branch --cov-report=xml --cov-report=term-missing -v
       - name: Upload to Codecov
         if: matrix.python-version == 3.7 && github.repository == 'tsutsu3/linkify-it-py'
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           name: linkify-py-pytests-py3.7
           flags: pytests
@@ -48,9 +48,9 @@ jobs:
   benchmark:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python 3.7
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.7
       - name: Install packagtes
@@ -76,15 +76,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Python 3.7
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.7
       - name: Build package
         run: |
-          pip install wheel
-          python setup.py sdist bdist_wheel
+          pip install build
+          python -m build
       - name: Publish
         uses: pypa/gh-action-pypi-publish@v1.1.0
         with:
