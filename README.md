@@ -3,6 +3,7 @@
 [![CI](https://github.com/tsutsu3/linkify-it-py/workflows/CI/badge.svg?branch=main)](https://github.com/tsutsu3/linkify-it-py/actions)
 [![pypi](https://img.shields.io/pypi/v/linkify-it-py)](https://pypi.org/project/linkify-it-py/)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/linkify-it-py/badges/version.svg)](https://anaconda.org/conda-forge/linkify-it-py)
+[![Documentation Status](https://readthedocs.org/projects/linkify-it-py/badge/?version=latest)](https://linkify-it-py.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/tsutsu3/linkify-it-py/branch/main/graph/badge.svg)](https://codecov.io/gh/tsutsu3/linkify-it-py)
 [![Maintainability](https://api.codeclimate.com/v1/badges/6341fd3ec5f05fde392f/maintainability)](https://codeclimate.com/github/tsutsu3/linkify-it-py/maintainability)
 
