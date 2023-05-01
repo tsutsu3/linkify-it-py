@@ -18,6 +18,22 @@ jobs:
           python-version: 3.8
       - uses: pre-commit/action@v3.0.0
 
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: python
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
   test:
     runs-on: ubuntu-latest
     strategy:
