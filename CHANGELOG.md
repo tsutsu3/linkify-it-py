@@ -1,5 +1,10 @@
 # Change Log
 
+## v2.0.1 (2023-05-02)
+
+- Update development tools
+- Fix sdist is missing tests
+
 ## v2.0.0 (2022-05-07)
 
 - Add `matchAtStart` method to match full URLs at the start of the string.
