@@ -35,6 +35,9 @@ dev = ["pre-commit", "isort", "flake8", "black", "pyproject-flake8"]
 benchmark = ["pytest", "pytest-benchmark"]
 doc = ["sphinx", "sphinx_book_theme", "myst-parser"]
 
+[tool.setuptools]
+packages = ["linkify_it", "test"]
+
 [tool.setuptools.dynamic]
 version = {attr = "linkify_it.__version__"}
 
