@@ -1,5 +1,9 @@
 # Change Log
 
+## v2.0.2 (2023-05-02)
+
+- Fix missing files to the test ([#44](https://github.com/tsutsu3/linkify-it-py/pull/44))
+
 ## v2.0.1 (2023-05-02)
 
 - Update development tools
