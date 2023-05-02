@@ -1,2 +1,3 @@
 include CHANGELOG.md
 include tox.ini
+recursive-include test *.txt *.py
