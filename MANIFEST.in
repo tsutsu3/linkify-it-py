@@ -1,4 +1,3 @@
 include CHANGELOG.md
 include tox.ini
-include test/utils.py
-recursive-include test/fixtures *.txt
+recursive-include test *.txt *.py
