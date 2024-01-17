@@ -18,22 +18,6 @@ jobs:
           python-version: 3.8
       - uses: pre-commit/action@v3.0.0
 
-  codeql:
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: python
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
-
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -60,6 +44,24 @@ jobs:
           name: linkify-py-pytests-py3.7
           flags: pytests
           fail_ci_if_error: true
+
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.7
+      - name: Build package test
+        run: |
+          pip install build
+          python -m build
+      - name: Build package test
+        run: |
+          mkdir tmp
+          pip install build
+          python -m build
 
   benchmark:
     runs-on: ubuntu-latest

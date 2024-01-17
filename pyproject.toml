@@ -4,16 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "linkify-it-py"
-authors = [
-    {name = "tsutsu3"},
-]
+authors = [{ name = "tsutsu3" }]
 description = "Links recognition library with FULL unicode support."
-urls = {Homepage = "https://github.com/tsutsu3/linkify-it-py"}
+urls = { Homepage = "https://github.com/tsutsu3/linkify-it-py" }
 readme = "README.md"
 requires-python = ">=3.7"
 keywords = ["linkify", "linkifier", "autolink", "autolinker"]
 dependencies = ["uc-micro-py"]
-license = {text = "MIT"}
+license = { text = "MIT" }
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
@@ -35,8 +33,11 @@ dev = ["pre-commit", "isort", "flake8", "black", "pyproject-flake8"]
 benchmark = ["pytest", "pytest-benchmark"]
 doc = ["sphinx", "sphinx_book_theme", "myst-parser"]
 
+[tool.setuptools]
+packages = ["linkify_it"]
+
 [tool.setuptools.dynamic]
-version = {attr = "linkify_it.__version__"}
+version = { attr = "linkify_it.__version__" }
 
 [tool.isort]
 multi_line_output = 3
