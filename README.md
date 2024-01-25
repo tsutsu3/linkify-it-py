@@ -12,6 +12,8 @@ This is Python port of [linkify-it](https://github.com/markdown-it/linkify-it).
 > Links recognition library with FULL unicode support.
 > Focused on high quality link patterns detection in plain text.
 
+__[Demo](https://linkify-it-py-demo.vercel.app/)__
+
 __[Javascript Demo](http://markdown-it.github.io/linkify-it/)__
 
 Why it's awesome:
