@@ -1,5 +1,5 @@
 - package: markdown-it/linkify-it
   url: https://github.com/markdown-it/linkify-it
-  version: 4.0.1
-  commit: 9482bfec2532cfccb8d7a55f1b89facf54760b48
-  date: May 2, 2022
+  version: 5.0.0
+  commit: 5e79093543092562b4348ea58395110357f3d296
+  date: Dec 2, 2023
