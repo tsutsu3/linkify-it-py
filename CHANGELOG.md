@@ -1,5 +1,12 @@
 # Change Log
 
+## v2.0.3 (2024-02-04)
+
+- Update port.yml (linkify-it v5.0.0) ([#54](https://github.com/tsutsu3/linkify-it-py/pull/54))
+- Fix rtd ([#52](https://github.com/tsutsu3/linkify-it-py/pull/52))
+- Add linkify-it-py-demo url ([#51](https://github.com/tsutsu3/linkify-it-py/pull/51))
+- Fix package build ([#49](https://github.com/tsutsu3/linkify-it-py/pull/49))
+
 ## v2.0.2 (2023-05-02)
 
 - Fix missing files to the test ([#44](https://github.com/tsutsu3/linkify-it-py/pull/44))
