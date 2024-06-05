@@ -40,7 +40,7 @@ SRC_PORT = (
 
 # Allow anything in markdown spec, forbid quote (") at the first position
 # because emails enclosed in quotes are far more common
-SRC_EMAIL_NAME = '[\\-:&=\\+\\$,\\.a-zA-Z0-9_][\\-:&=\\+\\$,\\"\\.a-zA-Z0-9_]*'
+SRC_EMAIL_NAME = '[\\-:&=\\+\\$,\\.\\w][\\-:&=\\+\\$,\\"\\.\\w]*'
 
 SRC_XN = "xn--[a-z0-9\\-]{1,59}"
 
