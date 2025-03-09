@@ -5,6 +5,7 @@ Version 2020110600, Last Updated Fri Nov  6 07:07:02 2020 UTC
 References:
     http://data.iana.org/TLD/tlds-alpha-by-domain.txt
 """
+
 TLDS = [
     "AAA",
     "AARP",
