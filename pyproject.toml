@@ -8,18 +8,18 @@ authors = [{ name = "tsutsu3" }]
 description = "Links recognition library with FULL unicode support."
 urls = { Homepage = "https://github.com/tsutsu3/linkify-it-py" }
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 keywords = ["linkify", "linkifier", "autolink", "autolinker"]
 dependencies = ["uc-micro-py"]
 license = { text = "MIT" }
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Intended Audience :: Developers",

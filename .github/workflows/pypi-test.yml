@@ -14,10 +14,10 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-      - name: Set up Python 3.7
+      - name: Set up Python 3.9
         uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Replace version
         run:
           sed -rie "s/__version__ = \"(.*)\"/__version__ = \"\1.${{ inputs.TESTPYPI_VESION }}\""/g linkify_it/__init__.py
@@ -26,7 +26,7 @@ jobs:
           pip install build
           python -m build
       - name: Publish package distributions to TestPyPI
-        uses: pypa/gh-action-pypi-publish@v1.12.2
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
           user: __token__
