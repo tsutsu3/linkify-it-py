@@ -1,6 +1,6 @@
 # linkify-it-py
 
-[![CI](https://github.com/tsutsu3/linkify-it-py/workflows/CI/badge.svg?branch=main)](https://github.com/tsutsu3/linkify-it-py/actions)
+[![CI](https://github.com/tsutsu3/linkify-it-py/actions/workflows/github-ci.yml/badge.svg)](https://github.com/tsutsu3/linkify-it-py/actions/workflows/github-ci.yml)
 [![pypi](https://img.shields.io/pypi/v/linkify-it-py)](https://pypi.org/project/linkify-it-py/)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/linkify-it-py/badges/version.svg)](https://anaconda.org/conda-forge/linkify-it-py)
 [![Documentation Status](https://readthedocs.org/projects/linkify-it-py/badge/?version=latest)](https://linkify-it-py.readthedocs.io/en/latest/?badge=latest)
