@@ -13,7 +13,7 @@ def read_fixture_file(path):
     skip_next = False
     comment_re = re.compile(r"^%.*")
 
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         lines = [x.rstrip() for x in f.readlines()]
 
     for idx, line in enumerate(lines):

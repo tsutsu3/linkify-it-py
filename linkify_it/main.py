@@ -25,7 +25,7 @@ class SchemaError(Exception):
     """Linkify schema error"""
 
     def __init__(self, name, val):
-        message = "(LinkifyIt) Invalid schema '{}': '{}'".format(name, val)
+        message = f"(LinkifyIt) Invalid schema '{name}': '{val}'"
         super().__init__(message)
 
 
@@ -46,8 +46,8 @@ class Match:
     """
 
     def __repr__(self):
-        return "{}.{}({!r})".format(
-            self.__class__.__module__, self.__class__.__name__, self.__dict__
+        return (
+            f"{self.__class__.__module__}.{self.__class__.__name__}({self.__dict__!r})"
         )
 
     def __init__(self, linkifyit, shift):

@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Checkout source
         uses: actions/checkout@v6
@@ -38,10 +38,10 @@ jobs:
         run: |
           pytest --cov=linkify_it --cov-branch --cov-report=xml --cov-report=term-missing -v
       - name: Upload to Codecov
-        if: matrix.python-version == 3.9 && github.repository == 'tsutsu3/linkify-it-py'
+        if: matrix.python-version == 3.10 && github.repository == 'tsutsu3/linkify-it-py'
         uses: codecov/codecov-action@v5
         with:
-          name: linkify-py-pytests-py3.9
+          name: linkify-py-pytests-py3.10
           flags: pytests
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -89,7 +89,7 @@ jobs:
           pytest benchmark/bench_core.py -k test_match -v
 
   publish:
-    name: Publish to PyPi
+    name: Publish to PyPI
     needs: [test]
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     runs-on: ubuntu-latest

@@ -14,10 +14,10 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v6
-      - name: Set up Python 3.9
+      - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.9
+          python-version: 3.x
       - name: Replace version
         run:
           sed -rie "s/__version__ = \"(.*)\"/__version__ = \"\1.${{ inputs.TESTPYPI_VESION }}\""/g linkify_it/__init__.py
