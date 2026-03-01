@@ -5,7 +5,7 @@
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/linkify-it-py/badges/version.svg)](https://anaconda.org/conda-forge/linkify-it-py)
 [![Documentation Status](https://readthedocs.org/projects/linkify-it-py/badge/?version=latest)](https://linkify-it-py.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/tsutsu3/linkify-it-py/branch/main/graph/badge.svg)](https://codecov.io/gh/tsutsu3/linkify-it-py)
-[![Maintainability](https://api.codeclimate.com/v1/badges/6341fd3ec5f05fde392f/maintainability)](https://codeclimate.com/github/tsutsu3/linkify-it-py/maintainability)
+[![Maintainability](https://qlty.sh/gh/tsutsu3/projects/linkify-it-py/maintainability.svg)](https://qlty.sh/gh/tsutsu3/projects/linkify-it-py)
 
 This is Python port of [linkify-it](https://github.com/markdown-it/linkify-it).
 
