@@ -5,7 +5,6 @@
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/linkify-it-py/badges/version.svg)](https://anaconda.org/conda-forge/linkify-it-py)
 [![Documentation Status](https://readthedocs.org/projects/linkify-it-py/badge/?version=latest)](https://linkify-it-py.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/tsutsu3/linkify-it-py/branch/main/graph/badge.svg)](https://codecov.io/gh/tsutsu3/linkify-it-py)
-[![Maintainability](https://qlty.sh/gh/tsutsu3/projects/linkify-it-py/maintainability.svg)](https://qlty.sh/gh/tsutsu3/projects/linkify-it-py)
 
 This is Python port of [linkify-it](https://github.com/markdown-it/linkify-it).
 
@@ -120,7 +119,6 @@ def normalize(obj, match):
 linkify.add("@", {"validate": validate, "normalize": normalize})
 ```
 
-
 ## API
 
 [API documentation](https://linkify-it-py.readthedocs.io/en/latest/)
@@ -159,11 +157,9 @@ By default understands:
 - __fuzzy_email__ - recognize emails without `mailto:` prefix. Default `True`.
 - __---__ - set `True` to terminate link with `---` (if it's considered as long dash).
 
-
 ### .test(text)
 
 Searches linkifiable pattern and returns `True` on success or `False` on fail.
-
 
 ### .pretest(text)
 
@@ -171,12 +167,10 @@ Quick check if link MAY BE can exist. Can be used to optimize more expensive
 `.test()` calls. Return `False` if link can not be found, `True` - if `.test()`
 call needed to know exactly.
 
-
 ### .test_schema_at(text, name, position)
 
 Similar to `.test()` but checks only specific protocol tail exactly at given
 position. Returns length of found pattern (0 on fail).
-
 
 ### .match(text)
 
@@ -217,11 +211,9 @@ is a `str` to alias to another schema, or an `dict` with `validate` and
 optionally `normalize` definitions.  To disable an existing rule, use
 `.add(key, None)`.
 
-
 ### .set(options)
 
 Override default options. Missed properties will not be changed.
-
 
 ## License
 
