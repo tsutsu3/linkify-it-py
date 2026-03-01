@@ -7,6 +7,9 @@ on:
       - "v*"
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   code-style:
     runs-on: ubuntu-latest
@@ -15,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.x
+          python-version: 3.12
       - uses: pre-commit/action@v3.0.1
 
   test:
@@ -38,10 +41,10 @@ jobs:
         run: |
           pytest --cov=linkify_it --cov-branch --cov-report=xml --cov-report=term-missing -v
       - name: Upload to Codecov
-        if: matrix.python-version == 3.10 && github.repository == 'tsutsu3/linkify-it-py'
+        if: matrix.python-version == 3.12 && github.repository == 'tsutsu3/linkify-it-py'
         uses: codecov/codecov-action@v5
         with:
-          name: linkify-py-pytests-py3.10
+          name: linkify-py-pytests-py3.12
           flags: pytests
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -53,7 +56,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.x
+          python-version: 3.12
       - name: Build package test
         run: |
           pip install build
@@ -71,7 +74,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.x
+          python-version: 3.12
       - name: Install packagtes
         run: |
           pip install .[benchmark]
@@ -93,19 +96,19 @@ jobs:
     needs: [test]
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      id-token: write
     steps:
       - name: Checkout source
         uses: actions/checkout@v6
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.x
+          python-version: 3.12
       - name: Build package
         run: |
           pip install build
           python -m build
-      - name: Publish
+      - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_KEY }}

@@ -22,6 +22,10 @@ Why it's awesome:
 - International domains support.
 - Allows rules extension & custom normalizers.
 
+## Python Version Support
+
+Tested on Python 3.10–3.14. The primary version for code coverage follows the latest
+[security phase](https://devguide.python.org/versions/) release (currently __3.12__).
 
 ## Install
 
