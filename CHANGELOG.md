@@ -1,5 +1,14 @@
 # Change Log
 
+## v2.1.0 (2026-03-01)
+
+- Drop support for EOL Python 3.7, 3.8 ([bd78752](https://github.com/tsutsu3/linkify-it-py/commit/bd78752))
+- Drop support for EOL Python 3.9 ([#75](https://github.com/tsutsu3/linkify-it-py/pull/75)) by [@hugovk](https://github.com/hugovk)
+- Add support for Python 3.14 ([#75](https://github.com/tsutsu3/linkify-it-py/pull/75)) by [@hugovk](https://github.com/hugovk)
+- Migrate to OIDC trusted publishing for PyPI and TestPyPI ([#77](https://github.com/tsutsu3/linkify-it-py/pull/77))
+- Add workflow permissions for security hardening ([#77](https://github.com/tsutsu3/linkify-it-py/pull/77))
+- Bump GitHub Actions dependencies ([#71](https://github.com/tsutsu3/linkify-it-py/pull/71), [#73](https://github.com/tsutsu3/linkify-it-py/pull/73))
+
 ## v2.0.3 (2024-02-04)
 
 - Update port.yml (linkify-it v5.0.0) ([#54](https://github.com/tsutsu3/linkify-it-py/pull/54))
