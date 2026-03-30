@@ -42,7 +42,7 @@ jobs:
           pytest --cov=linkify_it --cov-branch --cov-report=xml --cov-report=term-missing -v
       - name: Upload to Codecov
         if: matrix.python-version == 3.12 && github.repository == 'tsutsu3/linkify-it-py'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           name: linkify-py-pytests-py3.12
           flags: pytests
