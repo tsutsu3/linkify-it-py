@@ -44,7 +44,7 @@ SRC_PORT = (
 # because emails enclosed in quotes are far more common
 # Max name length capped to 64 chars (RFC 5321). This also prevents O(n^2)
 # rescans to the end on inputs like `mailto:mailto:...`
-SRC_EMAIL_NAME = '[\\-:&=\\+\\$,\\.a-zA-Z0-9_][\\-:&=\\+\\$,\\"\\.a-zA-Z0-9_]{0,63}'
+SRC_EMAIL_NAME = '[\\-;:&=\\+\\$,\\.a-zA-Z0-9_][\\-;:&=\\+\\$,\\"\\.a-zA-Z0-9_]{0,63}'
 
 SRC_XN = "xn--[a-z0-9\\-]{1,59}"
 
