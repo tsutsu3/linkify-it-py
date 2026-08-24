@@ -1,0 +1,17 @@
+%
+% Cases that fail only in this port, not in upstream linkify-it.
+%
+
+%
+% `;` in the email name. Upstream's src_email_name has allowed it since 5.0.0,
+% but this port dropped it from both halves of the character class.
+%
+a;b@example.com
+
+foo;bar;baz@example.com
+
+;a@example.com
+
+a;@example.com
+
+mailto:a;b@example.com
