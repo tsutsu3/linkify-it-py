@@ -145,33 +145,38 @@ class LinkifyIt:
             Default: {"fuzzy_link": True, "fuzzy_email": True, "fuzzy_ip": False}.
     """
 
+    # The built-in validators match at `pos` with a compiled pattern rather than
+    # running an `^`-anchored search over `text[pos:]` the way upstream does.
+    # The slice is an O(n) copy, and Python 3.10 does not apply the `^` anchor
+    # optimization, so `re.search` rescans the whole tail -- together that is
+    # quadratic on inputs like `mailto:mailto:...`. Schemas registered through
+    # `add()` keep the sliced form: their patterns are documented to start
+    # with `^`, which cannot match at a non-zero position.
+
     def _validate_http(self, text, pos):
-        tail = text[pos:]
         if not self.re.get("http"):
             # compile lazily, because "host"-containing variables can change on
             # tlds update.
-            self.re["http"] = (
-                "^\\/\\/"
+            self.re["http"] = re.compile(
+                "\\/\\/"
                 + self.re["src_auth"]
                 + self.re["src_host_port_strict"]
-                + self.re["src_path"]
+                + self.re["src_path"],
+                flags=re.IGNORECASE,
             )
 
-        founds = re.search(self.re["http"], tail, flags=re.IGNORECASE)
+        founds = self.re["http"].match(text, pos)
         if founds:
             return len(founds.group())
 
         return 0
 
     def _validate_double_slash(self, text, pos):
-        tail = text[pos:]
-
         if not self.re.get("not_http"):
             # compile lazily, because "host"-containing variables can change on
             # tlds update.
-            self.re["not_http"] = (
-                "^"
-                + self.re["src_auth"]
+            self.re["not_http"] = re.compile(
+                self.re["src_auth"]
                 + "(?:localhost|(?:(?:"
                 + self.re["src_domain"]
                 + ")\\.)+"
@@ -179,10 +184,11 @@ class LinkifyIt:
                 + ")"
                 + self.re["src_port"]
                 + self.re["src_host_terminator"]
-                + self.re["src_path"]
+                + self.re["src_path"],
+                flags=re.IGNORECASE,
             )
 
-        founds = re.search(self.re["not_http"], tail, flags=re.IGNORECASE)
+        founds = self.re["not_http"].match(text, pos)
         if founds:
             if pos >= 3 and text[pos - 3] == ":":
                 return 0
@@ -195,14 +201,13 @@ class LinkifyIt:
         return 0
 
     def _validate_mailto(self, text, pos):
-        tail = text[pos:]
-
         if not self.re.get("mailto"):
-            self.re["mailto"] = (
-                "^" + self.re["src_email_name"] + "@" + self.re["src_host_strict"]
+            self.re["mailto"] = re.compile(
+                self.re["src_email_name"] + "@" + self.re["src_host_strict"],
+                flags=re.IGNORECASE,
             )
 
-        founds = re.search(self.re["mailto"], tail, flags=re.IGNORECASE)
+        founds = self.re["mailto"].match(text, pos)
         if founds:
             return len(founds.group(0))
 
