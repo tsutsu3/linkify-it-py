@@ -23,8 +23,7 @@ def test_create_instance_with_schemas():
 
 
 def test_match_class():
-    linkifyit = LinkifyIt()
-    match = Match(linkifyit, 0)
+    match = Match("", "", -1, -1)
     assert (
         match.__repr__()
         == "linkify_it.main.Match({'schema': '', 'index': -1, 'last_index': -1, 'raw': '', 'text': '', 'url': ''})"  # noqa: E501
