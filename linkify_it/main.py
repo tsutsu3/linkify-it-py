@@ -21,6 +21,27 @@ def _index_of(text, search_value):
     return result
 
 
+def _at(candidates, position):
+    """Item at ``position``, or ``None`` once the list is exhausted."""
+    return candidates[position] if position < len(candidates) else None
+
+
+def _choose(a, b):
+    """Return whichever candidate should be emitted first.
+
+    The earlier start wins; on equal starts the longer match wins. A full tie
+    keeps ``a``, so the order the candidates are folded in sets the priority.
+    ``None`` means the corresponding list has no candidate left.
+    """
+    if a is None:
+        return b
+    if b is None:
+        return a
+    if a.index != b.index:
+        return a if a.index < b.index else b
+    return a if a.last_index >= b.last_index else b
+
+
 class SchemaError(Exception):
     """Linkify schema error"""
 
@@ -41,8 +62,10 @@ class Match:
         url (str): Normalized url of matched string.
 
     Args:
-        linkifyit (:class:`linkify_it.main.LinkifyIt`) LinkifyIt object
-        shift (int): text searh position
+        text (str): text the match was found in
+        schema (str): link schema, empty for fuzzy links
+        index (int): first position of matched string
+        last_index (int): next position after matched string
     """
 
     def __repr__(self):
@@ -50,17 +73,35 @@ class Match:
             f"{self.__class__.__module__}.{self.__class__.__name__}({self.__dict__!r})"
         )
 
-    def __init__(self, linkifyit, shift):
-        start = linkifyit._index
-        end = linkifyit._last_index
-        text = linkifyit._text_cache[start:end]
+    def __init__(self, text, schema, index, last_index):
+        raw = text[index:last_index]
 
-        self.schema = linkifyit._schema.lower()
-        self.index = start + shift
-        self.last_index = end + shift
-        self.raw = text
-        self.text = text
-        self.url = text
+        self.schema = schema.lower()
+        self.index = index
+        self.last_index = last_index
+        self.raw = raw
+        self.text = raw
+        self.url = raw
+
+
+class _Candidate:
+    """A single hit found by one of the scan passes of :meth:`LinkifyIt.match`.
+
+    Every pass collects all of its hits up front, so no pass ever rescans a tail
+    that an earlier one already walked.
+
+    Args:
+        schema (str): link schema, empty for fuzzy links
+        index (int): first position of matched string
+        last_index (int): next position after matched string
+    """
+
+    __slots__ = ("index", "last_index", "schema")
+
+    def __init__(self, schema, index, last_index):
+        self.schema = schema
+        self.index = index
+        self.last_index = last_index
 
 
 class LinkifyIt:
@@ -167,10 +208,6 @@ class LinkifyIt:
 
         return 0
 
-    def _reset_scan_cache(self):
-        self._index = -1
-        self._text_cache = ""
-
     def _create_validator(self, regex):
         def func(text, pos):
             tail = text[pos:]
@@ -193,8 +230,8 @@ class LinkifyIt:
 
         return func
 
-    def _create_match(self, shift):
-        match = Match(self, shift)
+    def _create_match(self, text, schema, index, last_index):
+        match = Match(text, schema, index, last_index)
         self._compiled[match.schema]["normalize"](match)
         return match
 
@@ -226,12 +263,6 @@ class LinkifyIt:
             self._opts = self.default_options
         else:
             self._opts = self.default_options
-
-        # Cache last tested result. Used to skip repeating steps on next `match` call.
-        self._index = -1
-        self._last_index = -1  # Next scan position
-        self._schema = ""
-        self._text_cache = ""
 
         if schemas:
             self.default_schemas.update(schemas)
@@ -367,10 +398,6 @@ class LinkifyIt:
             "(" + re_schema_test + ")|(" + self.re["host_fuzzy_test"] + ")|@"
         )
 
-        # Cleanup
-
-        self._reset_scan_cache()
-
     def add(self, schema, definition):
         """Add new rule definition. (chainable)
 
@@ -416,51 +443,27 @@ class LinkifyIt:
         Returns:
             bool: ``True`` if a linkable pattern was found, otherwise it is ``False``.
         """
-        self._text_cache = text
-        self._index = -1
-
         if not len(text):
             return False
 
         if re.search(self.re["schema_test"], text, flags=re.IGNORECASE):
-            regex = self.re["schema_search"]
-            last_index = 0
-            matched_iter = re.finditer(regex, text[last_index:], flags=re.IGNORECASE)
+            matched_iter = re.finditer(
+                self.re["schema_search"], text, flags=re.IGNORECASE
+            )
             for matched in matched_iter:
-                last_index = matched.end(0)
-                m = (matched.group(), matched.groups()[0], matched.groups()[1])
-                length = self.test_schema_at(text, m[2], last_index)
-                if length:
-                    self._schema = m[2]
-                    self._index = matched.start(0) + len(m[1])
-                    self._last_index = matched.start(0) + len(m[0]) + length
-                    break
+                if self.test_schema_at(text, matched.group(2), matched.end(0)):
+                    return True
 
         if self._opts.get("fuzzy_link") and self._compiled.get("http:"):
             # guess schemaless links
-            matched_tld = re.search(
-                self.re["host_fuzzy_test"], text, flags=re.IGNORECASE
-            )
-            if matched_tld:
-                tld_pos = matched_tld.start(0)
-            else:
-                tld_pos = -1
-            if tld_pos >= 0:
-                # if tld is located after found link - no need to check fuzzy pattern
-                if self._index < 0 or tld_pos < self._index:
-                    if self._opts.get("fuzzy_ip"):
-                        pattern = self.re["link_fuzzy"]
-                    else:
-                        pattern = self.re["link_no_ip_fuzzy"]
+            if re.search(self.re["host_fuzzy_test"], text, flags=re.IGNORECASE):
+                if self._opts.get("fuzzy_ip"):
+                    pattern = self.re["link_fuzzy"]
+                else:
+                    pattern = self.re["link_no_ip_fuzzy"]
 
-                    ml = re.search(pattern, text, flags=re.IGNORECASE)
-                    if ml:
-                        shift = ml.start(0) + len(ml.groups()[0])
-
-                        if self._index < 0 or shift < self._index:
-                            self._schema = ""
-                            self._index = shift
-                            self._last_index = ml.start(0) + len(ml.group())
+                if re.search(pattern, text, flags=re.IGNORECASE):
+                    return True
 
         if self._opts.get("fuzzy_email") and self._compiled.get("mailto:"):
             # guess schemaless emails
@@ -468,21 +471,10 @@ class LinkifyIt:
             if at_pos >= 0:
                 # We can't skip this check, because this cases are possible:
                 # 192.168.1.1@gmail.com, my.in@example.com
-                me = re.search(self.re["email_fuzzy"], text, flags=re.IGNORECASE)
-                if me:
-                    shift = me.start(0) + len(me.groups()[0])
-                    next_shift = me.start(0) + len(me.group())
+                if re.search(self.re["email_fuzzy"], text, flags=re.IGNORECASE):
+                    return True
 
-                    if (
-                        self._index < 0
-                        or shift < self._index
-                        or (shift == self._index and next_shift > self._last_index)
-                    ):
-                        self._schema = "mailto:"
-                        self._index = shift
-                        self._last_index = next_shift
-
-        return self._index >= 0
+        return False
 
     def pretest(self, text):
         """Very quick check, that can give false positives.
@@ -537,23 +529,94 @@ class LinkifyIt:
                 * **text** - normalized text
                 * **url** - link, generated from matched text
         """
-        shift = 0
+        if not len(text):
+            return None
+
+        # Collect every hit of each pattern in one pass over the whole text.
+        schemed = []
+        fuzzy_link = []
+        fuzzy_email = []
+
+        # scan for links with schema
+        if re.search(self.re["schema_test"], text, flags=re.IGNORECASE):
+            matched_iter = re.finditer(
+                self.re["schema_search"], text, flags=re.IGNORECASE
+            )
+            for matched in matched_iter:
+                length = self.test_schema_at(text, matched.group(2), matched.end(0))
+                if length:
+                    schemed.append(
+                        _Candidate(
+                            matched.group(2),
+                            matched.start(0) + len(matched.group(1)),
+                            matched.start(0) + len(matched.group(0)) + length,
+                        )
+                    )
+
+        if self._opts.get("fuzzy_link") and self._compiled.get("http:"):
+            # guess schemaless links
+            if self._opts.get("fuzzy_ip"):
+                pattern = self.re["link_fuzzy"]
+            else:
+                pattern = self.re["link_no_ip_fuzzy"]
+
+            for matched in re.finditer(pattern, text, flags=re.IGNORECASE):
+                fuzzy_link.append(
+                    _Candidate(
+                        "",
+                        matched.start(0) + len(matched.group(1)),
+                        matched.start(0) + len(matched.group(0)),
+                    )
+                )
+
+        if self._opts.get("fuzzy_email") and self._compiled.get("mailto:"):
+            # guess schemaless emails
+            matched_iter = re.finditer(
+                self.re["email_fuzzy"], text, flags=re.IGNORECASE
+            )
+            for matched in matched_iter:
+                fuzzy_email.append(
+                    _Candidate(
+                        "mailto:",
+                        matched.start(0) + len(matched.group(1)),
+                        matched.start(0) + len(matched.group(0)),
+                    )
+                )
+
+        # Merge the three streams, which are each already sorted by position,
+        # dropping candidates that overlap a match already emitted.
+        indexes = [0, 0, 0]
         result = []
+        last_index = 0
 
-        # try to take previous element from cache, if .test() called before
-        if self._index >= 0 and self._text_cache == text:
-            result.append(self._create_match(shift))
-            shift = self._last_index
+        while True:
+            candidates = [
+                _at(schemed, indexes[0]),
+                _at(fuzzy_email, indexes[1]),
+                _at(fuzzy_link, indexes[2]),
+            ]
 
-        # Cut head if cache was used
-        tail = text[shift:] if shift else text
+            candidate = _choose(_choose(candidates[0], candidates[1]), candidates[2])
 
-        # Scan string until end reached
-        while self.test(tail):
-            result.append(self._create_match(shift))
+            if candidate is None:
+                break
 
-            tail = tail[self._last_index :]
-            shift += self._last_index
+            if candidate is candidates[0]:
+                indexes[0] += 1
+            elif candidate is candidates[1]:
+                indexes[1] += 1
+            else:
+                indexes[2] += 1
+
+            if candidate.index < last_index:
+                continue
+
+            result.append(
+                self._create_match(
+                    text, candidate.schema, candidate.index, candidate.last_index
+                )
+            )
+            last_index = candidate.last_index
 
         if len(result):
             return result
@@ -570,10 +633,6 @@ class LinkifyIt:
         Retuns:
             ``Match`` or ``None``
         """
-        # Reset scan cache
-        self._text_cache = text
-        self._index = -1
-
         if not len(text):
             return None
 
@@ -581,16 +640,16 @@ class LinkifyIt:
         if not founds:
             return None
 
-        m = (founds.group(), founds.groups()[0], founds.groups()[1])
-        length = self.test_schema_at(text, m[2], len(m[0]))
+        length = self.test_schema_at(text, founds.group(2), len(founds.group(0)))
         if not length:
             return None
 
-        self._schema = m[2]
-        self._index = founds.start(0) + len(m[1])
-        self._last_index = founds.start(0) + len(m[0]) + length
-
-        return self._create_match(0)
+        return self._create_match(
+            text,
+            founds.group(2),
+            founds.start(0) + len(founds.group(1)),
+            founds.start(0) + len(founds.group(0)) + length,
+        )
 
     def tlds(self, list_tlds, keep_old=False):
         """Load (or merge) new tlds list. (chainable)
