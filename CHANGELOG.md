@@ -1,5 +1,14 @@
 # Change Log
 
+## v2.1.1 (2026-08-25)
+
+Security release: `LinkifyIt.match()` was quadratic on untrusted input when linkify is enabled ([GHSA-8m2q-wq3r-6hq8](https://github.com/tsutsu3/linkify-it-py/security/advisories/GHSA-8m2q-wq3r-6hq8)).
+
+- Fix quadratic complexity in `LinkifyIt.match()`, port of linkify-it 5.0.1 and 5.0.2 (upstream [CVE-2026-48801](https://github.com/advisories/GHSA-22p9-wv53-3rq4), [CVE-2026-59887](https://github.com/advisories/GHSA-v245-v573-v5vm)) ([#82](https://github.com/tsutsu3/linkify-it-py/pull/82))
+- Match validators at a position instead of slicing the tail, needed because Python 3.10 does not optimize the `^` anchor ([#82](https://github.com/tsutsu3/linkify-it-py/pull/82))
+- Allow `;` in the email name, matching linkify-it. **Behavior change**: `a;b@example.com` is now linkified ([#82](https://github.com/tsutsu3/linkify-it-py/pull/82))
+- Update port.yml (linkify-it v5.0.2) ([#82](https://github.com/tsutsu3/linkify-it-py/pull/82))
+
 ## v2.1.0 (2026-03-01)
 
 - Drop support for EOL Python 3.7, 3.8 ([bd78752](https://github.com/tsutsu3/linkify-it-py/commit/bd78752))
