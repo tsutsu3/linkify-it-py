@@ -15,3 +15,47 @@ foo;bar;baz@example.com
 a;@example.com
 
 mailto:a;b@example.com
+
+%
+% Astral-plane characters in host names. uc-micro-py's classes are UTF-16
+% surrogate-pair regexes from JavaScript, so they never fire on Python str and
+% these hosts are not recognized. linkify-it handles them.
+%
+𠮷.com
+
+𠮷野家.com
+
+𝔞𝔟.com
+
+example@𠮷.com
+
+%
+% Punctuation terminates a host. These are BMP controls: they already pass and
+% agree with linkify-it, and they are what makes the astral expectation in the
+% next block the consistent one.
+%
+a、b.com
+b.com
+
+a·b.com
+b.com
+
+a።b.com
+b.com
+
+
+% ===========================================================================
+% Deliberate divergence from linkify-it
+% ===========================================================================
+%
+% Astral punctuation terminating a host. linkify-it returns the whole
+% "a𐩐b.com": there U+10A50 is two UTF-16 code units and only the first is
+% recognized as punctuation, so the second slips through as a letter. Python
+% has no such split, so we terminate the host exactly like the BMP controls
+% above. Expect these to show up as differences when diffing against upstream.
+%
+a𐩐b.com
+b.com
+
+a𑁍b.com
+b.com
