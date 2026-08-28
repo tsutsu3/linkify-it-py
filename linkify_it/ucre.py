@@ -1,11 +1,4 @@
-from uc_micro.categories import Cc, Cf, P, Z
-from uc_micro.properties import Any
-
-SRC_ANY = Any.REGEX
-SRC_CC = Cc.REGEX
-SRC_CF = Cf.REGEX
-SRC_P = P.REGEX
-SRC_Z = Z.REGEX
+from ._ucre_data import SRC_ANY, SRC_CC, SRC_CF, SRC_P, SRC_Z
 
 # \p{\Z\P\Cc\CF} (white spaces + control + format + punctuation)
 SRC_ZPCC = "|".join([SRC_Z, SRC_P, SRC_CC])
