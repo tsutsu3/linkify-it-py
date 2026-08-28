@@ -133,3 +133,5 @@ dmypy.json
 .vscode/
 
 .benchmarks/
+
+uv.lock

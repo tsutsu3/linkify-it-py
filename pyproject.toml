@@ -10,7 +10,6 @@ urls = { Homepage = "https://github.com/tsutsu3/linkify-it-py" }
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["linkify", "linkifier", "autolink", "autolinker"]
-dependencies = ["uc-micro-py"]
 license = { text = "MIT" }
 classifiers = [
     "Development Status :: 5 - Production/Stable",
