@@ -1,5 +1,10 @@
 # Change Log
 
+## v2.2.0 (2026-08-29)
+
+- Fix astral-plane Unicode handling in links, including host names and link terminators ([#87](https://github.com/tsutsu3/linkify-it-py/pull/87))
+- Drop the runtime dependency on `uc-micro-py` ([#87](https://github.com/tsutsu3/linkify-it-py/pull/87))
+
 ## v2.1.1 (2026-08-25)
 
 Security release: `LinkifyIt.match()` was quadratic on untrusted input when linkify is enabled ([GHSA-8m2q-wq3r-6hq8](https://github.com/tsutsu3/linkify-it-py/security/advisories/GHSA-8m2q-wq3r-6hq8)).
